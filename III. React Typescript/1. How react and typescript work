@@ -1,0 +1,51 @@
+1. Vì sao code Typescript trong React ko sử dụng những Type cơ bản như void, callback Function cho React Functional
+- node_modules -> @types
+
+const App: React.FC = () => {
+    <JSX />    // nếu remove thì Typescript sẽ lỗi do đang cần return là 1 FC (chứa JSX code)
+}
+
+
+2. Interface cho props
+- Khi truyền props vào Child Component, Typescript cần khai báo type cho tất cả props
+
+interface ToDoListProps = {
+    items: { d: string, text: string }
+}
+
+const ToDoList: React.FC<ToDoListProps> = (props) => {
+    <ul>
+        {props.items.map...}
+    </ul>
+}
+
+
+3. Ref
+const textInputRef = useRef<HTMLInputElement>(null)
+
+
+4. Pass a function to Child Component
+- Child Component
+interface ToDoProps {
+    onAddToDo: (todoText: string) => void
+}
+
+const NewToDo: React.FC<ToDoProps> = props => {
+    ...using props.onAddToDo(enteredText)
+}
+
+
+5. useState with Array
+const [todo, setTodo] = useState([])   // Typescript sẽ hiểu todo chỉ là 1 empty array -> setTodo([{id: 1, text: 'New job'}]) -> error
+
+const todoHandler = (text: string) => {
+    setTodo
+}
+
+////
+interface ToDoModel = {
+    id: string,
+    text?: string           // ? mean optional
+}
+
+const [todo, setTodo] = useState<ToDo[]>([])
