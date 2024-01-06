@@ -1,0 +1,75 @@
+
+1. Optional and default parameter
+
+- Optional parameter
+// function getLength(numberList?: number[] | undefined): number
+const getLength = (numberList?: number[]) {
+    return Array.isArray(numberList) ? numberList.length : 0
+}
+
+
+- Default parameter
+// function getLength(numberList?: number[]): number
+const getLength = (numberList: number[] = []) {
+    return Array.isArray(numberList) ? numberList.length : 0
+}
+
+
+
+=> Error
+const getLength = (numberList?: number[] = []) {
+    return Array.isArray(numberList) ? numberList.length : 0
+}
+
+
+========================================================================================================================================
+2. Void and never
+- Void: Khi function không return về gì cả
+function noop() {
+    return
+}
+
+function noop() {
+}
+
+
+- Never: tức là ko bao giờ có, ko bao giờ tồn tại
+type NewType = number & string
+
+const noop = (x: number | string) {
+    if (typeof x === 'string') {
+        ...
+    } else if (typeof x === 'number') {
+        ...
+    } else {
+        x; // has type never
+    }
+}
+
+
+========================================================================================================================================
+3. Destructuring parameter
+const createStudent = (student: { id: number, name: string}) => {
+    const { id, name } = student
+    console.log(id, name)
+}
+
+const createStudent = ({id, name}: Student) => {
+    console.log(id, name)
+}
+
+
+4. Enum và union type
+- Ko sử dụng enum cho cái data đc return từ phía server, nếu ko phải parse qua lại
+enum MediaType {
+    JSON = 'application/json',
+    XML = 'application/xml'
+}
+
+- Prefer union type for data returned from API
+type MediaType = 'application/json' | 'application/xml'
+
+const response = await fetcher('api/endpoint')
+console.log(response.data) // 'application/json'
+
+

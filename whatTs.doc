@@ -1,3 +1,24 @@
+1. Typescript là 1 ngôn ngữ đc building up JS. (Add more new feature), giúp code JS dễ dàng và mạnh mẽ hơn
+- Có 1 bất lợi: browser ko thể execute Typescript. vì thế nó ko chỉ là 1 language mà còn là 1 tool compiler
+- Typescript compiler sẽ biên dịch các features của Typescript thành JS
+
+
+2. Lợi ích
+- Add type vào JS, giúp code rõ ràng hơn
+- Có cơ hội phát hiện lỗi sớm hơn (trước khi có error ở runtime trên browser)
+
+- Ví dụ như get value của 1 input
+const input = document.getElementById('input-1') -> JS ko biết có thể get đc element hay ko
+Cho dù get success thì đó có phải là 1 Input element hay ko?
+
+const valueInput = input.value -> nếu ko get đc element sẽ xảy ra lỗi
+
+
+3. Đuôi file .ts và tsx
+- .ts: dành cho plain JS
+- .tsx cho file có JSX
+
+
 1. Vì sao code Typescript trong React ko sử dụng những Type cơ bản như void, callback Function cho React Functional
 - node_modules -> @types
 
@@ -49,3 +70,8 @@ interface ToDoModel = {
 }
 
 const [todo, setTodo] = useState<ToDo[]>([])
+
+
+6: Vì sao sử dụng Typescript
+- Static type checking: giúp pháp hiện lỗi ngay lúc code: typo, length của undefined,.. giảm time debug
+- Types for tooling: nhắc code, auto suggestion

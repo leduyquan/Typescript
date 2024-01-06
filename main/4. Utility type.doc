@@ -1,0 +1,107 @@
+1. Partial
+- set all props in Type thành optional
+
+interface Student {
+    id: string
+    name: string
+}
+
+const updateStudent = (data: Partial<Student>) => {}
+
+
+
+2. Required, Readonly
+
+
+3. Record<Keys, Type>
+- Tạo ra type cho object (có value của property là cùng type)
+- Keys sẽ pick từ tập hợp key truyền vào
+- Type sẽ là type value của object
+
+interface CatInfo {
+    id: string,
+    name: string
+}
+
+type CatName = 'lulu' | 'milu' | 'loli'
+
+const cats: Record<CatName, CatInfo> = {
+    lulu: { id, name },
+    milu: { id, name },
+    loli: { id, name },
+}
+
+
+4. Pick
+interface Todo {
+  title: string;
+  description: string;
+  completed: boolean;
+}
+
+type TodoPreview = Pick<Todo, "title" | "completed">;
+
+const todo: TodoPreview = {
+  title: "Clean room",
+  completed: false,
+};
+
+
+
+5. Omit
+interface Todo {
+  title: string;
+  description: string;
+  completed: boolean;
+}
+
+type TodoPreview = Omit<Todo, "title" | "completed">;
+
+const todo: TodoPreview = {
+  description: "Clean room",
+};
+
+
+
+6. ReturnType<Type>
+- Lấy type của kết quả trả về của 1 function
+
+***
+const createPerson = (name: string, age: number) => {
+  return { name, age };
+}
+
+type Person = ReturnType<typeof createPerson>
+
+const person: Person = createPerson("John Doe", 30);
+console.log(person); // In ra: { name: 'John Doe', age: 30 }
+
+***
+async const fetchUserData = (userId: string) => {
+  const response = await fetch(`/api/user/${userId}`);
+  return await response.json();
+}
+
+type UserData = ReturnType<typeof fetchUserData>;
+
+
+
+7. Gán Type và gợi ý Type
+
+
+Sự khác nhau giữa hai đoạn mã TypeScript sau đây liên quan đến cách bạn chỉ định kiểu dữ liệu (type annotation) cho biến user:
+const user: User = { name: 'Quan' }
+Trong trường hợp này, bạn đang sử dụng type annotation để chỉ định rõ ràng kiểu dữ liệu của biến user là User.
+Điều này có nghĩa rằng bạn đang bắt buộc TypeScript kiểm tra và đảm bảo rằng biến user phải có cấu trúc giống với kiểu User. 
+Nếu bạn cố gắng gán một giá trị có cấu trúc khác vào biến user, TypeScript sẽ báo lỗi.
+
+const user = { name: 'Quan' } as User
+Trong trường hợp này, bạn đang sử dụng toán tử as để ép kiểu dữ liệu của giá trị gán cho biến user thành kiểu User. 
+Điều này không yêu cầu TypeScript kiểm tra kiểu dữ liệu của giá trị gán cho biến user. 
+TypeScript sẽ chỉ thực hiện ép kiểu dữ liệu tĩnh, và nếu không thể ép kiểu một cách an toàn, bạn có thể gặp lỗi ở thời điểm chạy (runtime error).
+
+Sự khác biệt chính giữa hai cách này là trong trường hợp thứ nhất (const user: User = { name: 'Quan' }), 
+TypeScript kiểm tra kiểu dữ liệu tĩnh một cách chặt chẽ và cung cấp bảo vệ kiểu dữ liệu tốt hơn. 
+Trong khi đó, trong trường hợp thứ hai (const user = { name: 'Quan' } as User), 
+bạn đang tự chịu trách nhiệm về việc ép kiểu và có thể gặp lỗi ở thời điểm chạy nếu ép kiểu không thành công.
+

@@ -1,0 +1,86 @@
+1. Khi thiếu type từ thư viện
+
+import { getContent } from 'builder' // đang thiếu type để validate
+
+const content = await getContent()
+
+function processContent(content) {
+
+}
+
+=>
+
+type Content = ReturnType<typeof getContent> // khi trỏ vào Content type thì nó là 1 async function đang
+                                                return về 1 promise
+
+type Content = Awaited<ReturnType<typeof getContent>>
+type ContentKind = NonNullable<Parameters<typeof getContent>[0]>   // type params của getContent
+
+function processContent(content: Content, kind: ContentKind) {
+
+}
+
+
+2. Khai báo literal union type based on enum
+enum Theme {                            // Vì ko thể thay đổi giá trị enum nên ko cần as const
+    DEFAULT = 'Default',
+    LIGHT = 'Light',
+    DARK = 'Dark',
+}
+<=>
+const Theme = {
+    DEFAULT = 'Default',
+    LIGHT = 'Light',
+    DARK = 'Dark',
+} as const
+
+type EnumToUnion<T> = T[keyof T];
+type ThemeType = keyof typeof Theme    // DEFAULT | LIGHT | DARK
+
+type ThemeType1 = Theme.DEFAULT | DEFAULT.LIGHT | Theme.DARK
+type ThemeType2 = (typeof Theme)[keyof typeof Theme]
+type ThemeType2 = EnumToUnion<typeof Theme>
+
+***
+const getTheme = (th: 'Default' | 'Light' | 'Dark') => {};
+getTheme(Theme.DEFAULT)  // OK
+getTheme('Default')      // OK
+
+
+***
+const getTheme = (th: ThemeType1) => {};
+getTheme(Theme.DEFAULT)  // OK
+getTheme('Default')      // Error
+
+
+***
+const getTheme = (th: ThemeType2) => {};
+getTheme(Theme.DEFAULT)  // OK
+getTheme('Default')      // Error
+
+***
+const Theme = {
+    DEFAULT = 'Default',
+    LIGHT = 'Light',
+    DARK = 'Dark',
+} as const
+
+const ThemeType = 'Default' | 'Light' | 'Dark'
+const ThemeType = '(typeof Theme)[keyof typeof Theme]
+
+const getTheme = (th: ThemeType) => {};
+getTheme1(Theme.DARK); // OK
+getTheme1("Default"); // OK
+
+::: Explain
+- typeof Theme: tức là type của cái const Theme
+- keyof typeof Theme: sẽ lấy literal union type của các key của Theme
+- Bây giờ muốn extract value của object: index into this kind with dynamic property
+(typeof Theme)[keyof typeof Theme]
+
+<=>
+type ThemeType = {
+  DEFAULT: "Default";
+  LIGHT: "Light";
+  DARK: "Dark";
+}['DEFAULT' | 'DARK' | 'LIGHT']

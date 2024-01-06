@@ -1,0 +1,298 @@
+1. Type of function return a object
+
+interface User {
+  id: number;
+  firstName: string;
+  lastName: string;
+  role: "admin" | "user" | "super-admin";
+  posts: Array<Post>;
+}
+
+interface Post {
+  id: number;
+  title: string;
+}
+
+- Should be:
+const makeUser = (): User => {
+  return {
+    id: 1,
+    firstName: 'fd',
+    lastName: 'fd',
+    role: 'admin',
+    posts: []
+  };
+};
+
+
+
+========================================================================================================================================
+2. Type function
+
+/**
+ * How do we type onFocusChange?
+ */
+const addListener = (onFocusChange: unknown) => {
+  window.addEventListener("focus", () => {
+    onFocusChange(true);
+  });
+
+  window.addEventListener("blur", () => {
+    onFocusChange(false);
+  });
+};
+
+addListener((isFocused) => {
+  console.log({ isFocused });
+
+  type tests = [Expect<Equal<typeof isFocused, boolean>>];
+});
+
+
+Should be:
+- const addListener = (onFocusChange: (isFocus: boolean) => void) => {}
+type FocusListener = (isFocused: boolean) => void
+const onFocusChange: FocusListener = () => { return '' } // can still use return
+const onFocusChange = (isFocused: boolean): void => {}   // OK
+
+
+
+
+========================================================================================================================================
+3. Type async function
+
+import { expect, it } from "vitest";
+
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+const createThenGetUser = async (
+  createUser: unknown,
+  getUser: unknown,
+): Promise<User> => {
+  const userId: string = await createUser();
+
+  const user = await getUser(userId);
+
+  return user;
+};
+
+it("Should create the user, then get them", async () => {
+  const user = await createThenGetUser(
+    async () => "123",
+    async (id) => ({
+      id,
+      firstName: "Matt",
+      lastName: "Pocock",
+    }),
+  );
+
+  expect(user).toEqual({
+    id: "123",
+    firstName: "Matt",
+    lastName: "Pocock",
+  });
+});
+
+- Should be:
+const createThenGetUser = async (
+  createUser: () => Promise<string>,
+  getUser: (id: string) => Promise<User>,
+): Promise<User> => {}
+
+
+
+========================================================================================================================================
+4. Type of promises and async request
+
+interface LukeSkyWalker {
+  name: string;
+  height: string;
+  mass: string;
+  hair_color: string;
+  skin_color: string;
+  eye_color: string;
+  birth_year: string;
+  gender: string;
+}
+
+const fetchLukeSkyWalker = async (): LukeSkyWalker => {
+  const data = await fetch("https://swapi.dev/api/people/1").then((res) => {
+    return res.json();
+  });
+
+  return data;
+};
+
+- Lỗi khi khai báo Type cho 1 promise vì có key async (luôn luôn trả về 1 promise)
++ Vì vậy luke ở line dưới phải có Type là promise thay vì LukeSkyWalker
+const luke = fetchLukeSkyWalker()   // luke type LukeSkyWalker
+
+- Update lại:
+const fetchLukeSkyWalker = async (): Promise<LukeSkyWalker> => {
+  const data = await fetch("https://swapi.dev/api/people/1").then((res) => {
+    return res.json();
+  });
+
+  return data;
+};
+
+const fetchLukeSkyWalker = async () => {
+  const data: LukeSkyWalker = await fetch("https://swapi.dev/api/people/1").then((res) => {
+    return res.json();
+  });
+
+  return data; // or as LukeSkyWalker
+};
+
+const luke = fetchLukeSkyWalker() // luke.name => Error
+const luke = await fetchLukeSkyWalker() // luke.name => OK
+
+
+
+
+========================================================================================================================================
+5, Type of dynamic key of object
+
+const createCache = () => {
+  const cache = {};
+
+  const add = (id: string, value: string) => {
+    cache[id] = value;
+  };
+
+  const remove = (id: string) => {
+    delete cache[id];
+  };
+
+  return {
+    cache,
+    add,
+    remove,
+  };
+};
+
+it("Should add values to the cache", () => {
+  const cache = createCache();
+
+  cache.add("123", "Matt");
+
+  expect(cache.cache["123"]).toEqual("Matt");  // Error
+});
+
+- Should be:
+const cache: Record<string, string> = {};
+const cache: {
+    [key in string]: string
+} = {};
+
++ [key in string]: index (key) of an object     // khi gặp index in a type error, thường nó là key in object
+
+
+
+========================================================================================================================================
+6. Type of function have many Types of one argument
+
+type Amount = number | { amount: number }
+
+const coerceAmount = (amount: Amount) => {
+    if (amount.amount) {  => Error: property amount can not exist in type number
+                             // can not access a property unless you know it's there
+        return amount.amount
+    }
+
+    return amount
+};
+
+it("Should return the amount when passed an object", () => {
+  expect(coerceAmount({ amount: 20 })).toEqual(20);
+});
+
+it("Should return the amount when passed a number", () => {
+  expect(coerceAmount(20)).toEqual(20);
+});
+
+
+- Should be:
+const coerceAmount = (amount: Amount) => {
+    if (typeof amount === 'object) {
+        return amount.amount
+    }
+
+    return amount
+};
+
+
+
+========================================================================================================================================
+7. Type Error in try catch
+
+const tryCatchDemo = (state: "fail" | "succeed") => {
+  try {
+    if (state === "fail") {
+      throw new Error("Failure!");
+    }
+  } catch (e) {
+    return e.message;   // Error
+  }
+};
+
+it("Should return the message when it fails", () => {
+  expect(tryCatchDemo("fail")).toEqual("Failure!");
+});
+
+- Should be:
++ e: any  => lose all autocomplete
++ return (e as Error).message
++ Nếu đoạn block try trở nên phức tạp, và e có thể ko phải là type Error thì sao? throw "Failure" (not throw new Error("Failure!")?) 
+if (e instanceof Error) {
+  return e.message
+}
+
+
+
+========================================================================================================================================
+8. Type combine Types
+
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface Post {
+  id: string;
+  title: string;
+  body: string;
+}
+
+export const getDefaultUserAndPosts = (): unknown => {
+  return {
+    id: "1",
+    firstName: "Matt",
+    lastName: "Pocock",
+    posts: [
+      {
+        id: "1",
+        title: "How I eat so much cheese",
+        body: "It's pretty edam difficult",
+      },
+    ],
+  };
+};
+
+const userAndPosts = getDefaultUserAndPosts();
+
+console.log(userAndPosts.posts[0]); // Error
+
+Should be:
+export const getDefaultUserAndPosts = (): User & { posts: Post[] } => {}
+
+
+
+========================================================================================================================================
+9. Type and Interface
+

@@ -1,0 +1,111 @@
+1. Explicit types (khai báo tường minh): use type annotation
+- Sử dụng dấu : đằng sau tên biến
+let count: number = 5
+
+========================================================================================================================================
+2. Inferred types
+- Kiểu suy luận: ko cần khai báo cụ thể kiểu dữ liệu
+let count = 5
+
+
+========================================================================================================================================
+3. Literal type: lấy giá trị làm kiểu dữ liệu
+const count: 1 = 1
+const isResult: 'win' | 'lose' = 'lose'
+
+let count = 1     => typescript sẽ suy ra type của count là number
+const count = 1   => typescript sẽ suy ra type của count là 1
+
+const student = {
+    id: 1,
+    name: 'Quan'
+}
+=> typescript sẽ suy ra
+const student: {
+    id: number,
+    name: string
+}
+
+
+* Nếu mún const object không thay đổi đc thì
+const student = {
+    id: 1,
+    name: 'Quan'
+} as const
+=> 
+const student: {
+    readonly id: 1,
+    readonly name: 'Quan'
+}
+
+
+========================================================================================================================================
+4. Type assertion
+- Set type cho value và nói với compiler ko cần infer nó nữa
+function setStatus(status: 'active') {
+    // ...
+}
+
+let s = 'active'
+setStatus(s as 'active')
+
+
+========================================================================================================================================
+5. Alias
+- Đặt tên lại cho bất cứ kiểu dữ liệu nào khác
+
+type SchoolName = 'Marie'
+
++ Có thể dùng cho primary type: type StudentName = string
++ Ko có cơ chế merge cho các type cùng tên => lỗi duplicate
+
+
+========================================================================================================================================
+6. Interface
+- Đặt tên cho object type
++ Ko dùng cho primary type đc
++ Có thể merge đc cái interface có cùng tên
+
+
+========================================================================================================================================
+7. Union types
+- Là 1 type form cho 2 hay nhiều types
+
+type Status = 'active' | 'inactive'   // union type kết hợp 2 literal types
+type StudentId = number | string
+
+
+========================================================================================================================================
+8. Intersection type
+- Tổng hợp, gộp lại, kế thừa các types
+
+interface Partner {
+    name: string
+    credit: number
+}
+
+interface Contact {
+    email: string
+    phone: number
+}
+
+type Customer = Partner & Contact
+interface Customer extend Partner, Contact {}
+
+
+
+***
+- Dùng interface mọi trường hợp cho đến khi ko thể dùng đc nữa. Ví dụ case literal union
+Use interface until you need to use features from type alias.
+
+
+
+9. Typeof và keyof
+- typeof: lấy kiểu dữ liệu của 1 biến, 1 hàm or 1 Enum (ko type và interface)
+
+- keyof: lấy tập hợp các keys của 1 typeof enum, 1 typeof object, 1 type, 1 interface
++ tuy nhiên đối với keyof Enum thì nó sẽ return về cá property
+Lý do là vì enum không phải là một kiểu dữ liệu đối tượng. Enum là một kiểu dữ liệu số nguyên liên kết với các tên. 
+Vì vậy, bạn cần sử dụng typeof để lấy kiểu của enum đó, sau đó sử dụng keyof để lấy tên của các thành viên trong enum.
+
++ Với object thì dùng: keyof typeof objectA

@@ -1,0 +1,126 @@
+- JSX.IntrinsicElements: div, span, button,...
+- JSX.ElementConstructor: ReactElement | Component (Class)
+
+
+
+1. Component Props Types
+
+interface Props {
+    className: string
+    children: React.ReactNode   // Using React.ReactNode, not using React.ReactElement or JSX.Element
+    onClick: React.MouseEventHandler
+    onChange: React.ChangeEventHandler
+}
+
+
+
+========================================================================================================================================
+2. Passing a Component as a Prop
+
+const Row = (props: {
+  icon: React.ComponentType<{
+    className?: string;
+  }>;
+}) => {
+  return (
+    <div>
+      <props.icon className="h-8 w-8" />
+    </div>
+  );
+};
+
+<Row icon={UserIcon} />;
+
+
+
+========================================================================================================================================
+3. Event Type
+
+const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const newValue = e.target.value;
+}
+
+
+
+========================================================================================================================================
+4. Type of base component
+
+import { ComponentProps } from "react";
+
+export type InputProps =
+  ComponentProps<"input"> & {
+    label: string;
+  };
+
+export function Input({
+  label,
+  ...props
+}: InputProps) {
+  return (
+    <label>
+      {label}
+      <input {...props} />
+    </label>
+  );
+}
+
+But unfortunately, intersections used this way will, on the scale of a large codebase, slow TypeScript down.
+https://github.com/microsoft/TypeScript/wiki/Performance#preferring-interfaces-over-intersections
+Instead, you should use an interface, using interface extends
+
+
+import { ComponentProps } from "react";
+
+export interface ButtonProps extends ComponentProps<"button"> {
+  label: string;
+}
+
+const Button: FC<ButtonProps> = ({label, ...rest}) => {
+    return <div></div>
+}
+
+
+
+========================================================================================================================================
+5. Overriding and Removing Component Props
+- Override onChange props by default
+
+type InputProps = ComponentProps<"input"> & { onChange: (value: string) => void }
+
+const Input = (
+  props: InputProps
+) => {
+  return (
+    <input
+      {...props}
+      onChange={(e) => {
+        props.onChange(e.target.value); // Error: string | React.ChangeEvent<>
+      }}
+    ></input>
+  );
+};
+
+
+- Should be:
+type InputProps = Omit<ComponentProps<"input">, 'onChange'> & { onChange: (value: string) => void }
+
+interface InputProps extends Omit<ComponentProps<"input">, 'onChange'> {
+    onChange: (value: string) => void
+}
+
+=> onChange đã được override
+
+- Common way:
+type OverrideProps<T, TOverridden> = Omit<T, keyof TOverridden> & TOverridden
+
+type InputProps = OverrideProps<ComponentProps<'input'>, {
+    onChange: (value: string) => void
+}>
+
+
+
+========================================================================================================================================
+6. Extract Component Props
+- Khi muốn extract props từ external component:
+
+type NavBarProps = ComponentProps<typeof NavBar>

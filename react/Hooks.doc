@@ -1,0 +1,92 @@
+1. Typescript doesn't care about properties đc thêm vô object trong lúc so sánh function
+
+interface TypeState {
+    tags: {id: number, value: string}[],
+    selectedTag: number | null
+}
+
+a/ Trong case object
+const tagState: TypeState = {
+    selectedTag: '1', // will be error
+    tags: []
+}
+
+b/ Trong case func => object
+type GetTypeState = () => TypeState
+
+const getTagState: GetTypeState = () => ({
+    selectedTag: '1', // ko bị warning hay error
+    tags: []
+})
+
+- Vì trong case a/, Typescript check object match với another object
+- Còn trong case b/ sẽ phải check func match với func, và trong Typescript chúng ta đc cho phép
+truyền thêm properties vào trong return value của function
+
+c/ Solution
+- Gán type value cho function đó, sau đó Typescript có thể so sánh object và object trởi lại
+
+const getTagState: GetTypeState = ():TypeState  => ({
+    selectedTag: '1', // ko bị warning hay error
+    tags: []
+})
+
+
+2. useCallback
+
+const onClick = useCallback(
+    (buttonName: string): void => {
+      console.log(props.id, buttonName);
+    },
+    [props.id]
+);
+
+
+3. useMemo
+
+- CHo tự infer
+
+
+4. Pass ref
+a/ nullAsRef: pass object với current là 1 HTML
+<div ref={{ current: '1232131' }}></div> // wrong -> string is not assigned type HTMLDivElement | null
+
+b/ Legacy ref
+<div ref={'legacyRef'}></div> // string
+
+c/ Callback ref (legacy ref)
+<div ref={(htmlDivElement) => typeof htmlDivElement === HTMLDivElement | null }></div>
+
+d/ Sẽ ko set undefined cho ref current đc
+<div ref={{
+    current: undefined // wrong -> undefined is not assigned type HTMLDivElement
+}}></div>
+- Lý do: khi div gets unmounted. React sẽ set things trong callback ref với empty value, chứ ko phải là undefined (React chọn null
+chứ ko phải undefined cho callback ref)
+
+
+
+5. useRef
+const refDiv = useRef<HTMLDivElement>(null);
+- Cần truyền null vào vì ref ko nhận undefined làm giá trị default
+
+
+
+6. Making a read-only ref
+const ref = useRef<string>(null);
+
+// Why is this not allowed?
+ref.current = "Hello";
+
+
+- Do useRef có tới 3 function overload phụ thuộc vào params truyền vào
+const firstOverload = useRef<string>('le duy quan')
+firstOverload.current = 'Haha' // OK do đc return về MutableRefObject (without readonly current)
+
+const secondOverload = useRef<string>(null)
+firstOverload.current = 'Haha' // Error do return về RefObject (readonly current)
+-> ko thể assign current cho anything
+-> pass null vào có nghĩa: I want you to manage this ref, I don't want to manage this ref
+
+const secondOverload = useRef<string>()
+firstOverload.current = 'Haha' // Error do return về RefObject (readonly current)

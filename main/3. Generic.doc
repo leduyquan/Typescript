@@ -1,0 +1,66 @@
+1. Generic type
+- Truyền vào 1 type
++ T: type
++ K: key
++ V: value
+
+
+interface List<T> {
+    length: number
+    [index: number]: T
+}
+
+const numberList: List<number> = [1, 2, 3, 4, 5]
+const stringList: List<string> = ['hi', 'hello']
+
+
+
+2. Generic cho function
+const makeArray = (x: number, y: string) => [x, y]
+
+=>
+const makeArray = <X, Y>(x: X, y: Y) => [x, y]
+
+const makeTuple = <X, Y>(x: X, y: Y): [X, Y] => [x, y]
+
+const makeArray = <X, Y = number>(x: X, y: Y) => [x, y]
+
+
+
+
+
+
+========================================================================================================================================
+2. keyof
+
+interface Student {
+    id: string
+    name: string
+}
+
+type StudentKeys = keyof Student
+<=> type StudentKeys = 'id' | 'name'
+
+const keys: StudentKeys = ''
+
+
+
+3. Mapped type
+type Gender<T> = {
+    [Key in keyof Type as `get${Capitalize<string & Key>}`]: () => T<Key>
+}
+
+interface Person {
+    name: string
+    age: number
+    location: string
+}
+
+type LazyPerson = Gender<Person>
+// tương đương với:
+type LazyPerson = {
+    getName: () => string
+    getAge: () => number
+    getLocation: () => string
+}
+
